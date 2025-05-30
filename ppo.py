@@ -26,15 +26,15 @@ class MLPActorCritic(nn.Module):
         layers.append(nn.Linear(prev, output_dim))
         return nn.Sequential(*layers)
 
+    # Fix: Ensure the input tensor is on the same device as the model
     def step(self, obs):
         with torch.no_grad():
+            # Move the input observation to the same device as the model
+            obs = obs.to(self.device)
             mean = self.policy_net(obs)
             std = torch.exp(self.log_std)
             dist = Normal(mean, std)
-            action = dist.sample()
-            log_prob = dist.log_prob(action).sum(axis=-1)
-            value = self.value_net(obs).squeeze(-1)
-        return action, log_prob, value
+        return dist.sample(), dist.log_prob(dist.sample())
 
     def evaluate(self, obs, actions):
         obs = obs.to(next(self.parameters()).device)
