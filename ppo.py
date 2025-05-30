@@ -27,7 +27,6 @@ class MLPActorCritic(nn.Module):
         return nn.Sequential(*layers)
 
     def step(self, obs):
-        obs = obs.to(next(self.parameters()).device)
         with torch.no_grad():
             mean = self.policy_net(obs)
             std = torch.exp(self.log_std)
@@ -157,14 +156,18 @@ class PPOAgent:
             self.reward_avg.append(np.mean(rew_buf))
 
     def select_action(self, state: np.ndarray, evaluate: bool = False):
-        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(self.device)
+        if not torch.is_tensor(state):
+            state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+        else:
+            state_tensor = state.unsqueeze(0) if state.ndim == 1 else state
+
+        state_tensor = state_tensor.to(self.device)
         action, logp, value = self.actor_critic.step(state_tensor)
+
         if not evaluate:
             clipped_action = torch.clamp(action, -self.act_limit, self.act_limit)
-            return clipped_action.numpy().squeeze(), logp, value
-        return action.numpy().squeeze()
-
-
+            return clipped_action.cpu().numpy().squeeze(), logp, value
+        return action.cpu().numpy().squeeze()
 
     # def record_video(self, video_path="ppo_bipedal_videos", iter = 0, episode_length=1600):
     #     env = RecordVideo(
