@@ -18,13 +18,13 @@ PPO_CONFIG = OptimizationConfig(
         # PPO specific parameters
         'clip_ratio': ParameterRange(0.1, 0.3),
 
-        # Training parameters
-        'batch_size': ParameterRange(64, 256, step=64),
-        'steps_per_epoch': ParameterRange(100, 1600, step=100),
-        'train_iters': ParameterRange(20, 400, step=10),
-
-        # Normalization and clipping
-        'target_kl': ParameterRange(0.00, 0.03),
-        'n_steps': ParameterRange(40, 100, step=10),
+        # # Training parameters
+        # 'batch_size': ParameterRange(64, 256, step=64),
+        # 'steps_per_epoch': ParameterRange(100, 1600, step=100),
+        # 'train_iters': ParameterRange(20, 400, step=10),
+        #
+        # # Normalization and clipping
+        # 'target_kl': ParameterRange(0.00, 0.03),
+        # 'n_steps': ParameterRange(40, 100, step=10),
     }
 )
