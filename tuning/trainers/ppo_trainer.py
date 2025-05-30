@@ -19,8 +19,8 @@ class PPOTrainer(BaseTrainer):
 
     def create_agent(self, params: Dict[str, Any]) -> PPOAgent:
         state_dim, action_dim, max_action = self.env_manager.get_env_info()
-        # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        return PPOAgent(state_dim, action_dim, max_action, **params)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        return PPOAgent(state_dim, action_dim, max_action, device, **params)
 
     def train_step(self, agent: PPOAgent, env:gym.Env, state: np.ndarray, params: Dict[str, Any]) -> tuple:
         action, logp, value = agent.select_action(state)

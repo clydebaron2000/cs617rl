@@ -15,7 +15,7 @@ def objective(trial: optuna.Trial) -> float:
 
 def main():
     # Create study
-    study = optuna.create_study(direction="maximize")
+    study = optuna.create_study(study_name="PPO_GAE", direction="maximize")
 
     # Optimize
     study.optimize(objective, n_trials=50)

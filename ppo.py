@@ -52,6 +52,7 @@ class PPOAgent:
         obs_dim,
         act_dim,
         act_limit,
+        device,
         hidden_sizes=(64, 64),
         clip_ratio=0.2,
         lr=3e-4,
@@ -63,9 +64,9 @@ class PPOAgent:
         batch_size=64,
             **kwargs
     ):
-        self.actor_critic = MLPActorCritic(obs_dim, act_dim, hidden_sizes)
+        self.actor_critic = MLPActorCritic(obs_dim, act_dim, hidden_sizes).to(device)
         self.optimizer = optim.Adam(self.actor_critic.parameters(), lr=lr)
-
+        self.device = device
         self.clip_ratio = clip_ratio
         self.train_iters = train_iters
         self.target_kl = target_kl
@@ -87,11 +88,11 @@ class PPOAgent:
         return adv
 
     def update(self, obs_buf, act_buf, adv_buf, ret_buf, logp_old_buf):
-        obs_buf = torch.tensor(obs_buf, dtype=torch.float32)
-        act_buf = torch.tensor(act_buf, dtype=torch.float32)
-        adv_buf = torch.tensor(adv_buf, dtype=torch.float32)
-        ret_buf = torch.tensor(ret_buf, dtype=torch.float32)
-        logp_old_buf = torch.tensor(logp_old_buf, dtype=torch.float32)
+        obs_buf = torch.tensor(np.array(obs_buf), dtype=torch.float32).to(self.device)
+        act_buf = torch.tensor(np.array(act_buf), dtype=torch.float32).to(self.device)
+        adv_buf = torch.tensor(np.array(adv_buf), dtype=torch.float32).to(self.device)
+        ret_buf = torch.tensor(np.array(ret_buf), dtype=torch.float32).to(self.device)
+        logp_old_buf = torch.tensor(np.array(logp_old_buf), dtype=torch.float32).to(self.device)
 
         for _ in range(self.train_iters):
             idx = np.random.permutation(len(obs_buf))
