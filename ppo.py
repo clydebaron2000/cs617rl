@@ -27,6 +27,7 @@ class MLPActorCritic(nn.Module):
         return nn.Sequential(*layers)
 
     def step(self, obs):
+        obs = obs.to(next(self.parameters()).device)
         with torch.no_grad():
             mean = self.policy_net(obs)
             std = torch.exp(self.log_std)
@@ -37,6 +38,8 @@ class MLPActorCritic(nn.Module):
         return action, log_prob, value
 
     def evaluate(self, obs, actions):
+        obs = obs.to(next(self.parameters()).device)
+        actions = actions.to(next(self.parameters()).device)
         mean = self.policy_net(obs)
         std = torch.exp(self.log_std)
         dist = Normal(mean, std)
@@ -126,7 +129,7 @@ class PPOAgent:
         for epoch in range(epochs):
             obs_buf, act_buf, adv_buf, ret_buf, logp_buf, rew_buf, val_buf, done_buf = [], [], [], [], [], [], [], []
             for _ in range(self.steps_per_epoch):
-                obs_tensor = torch.tensor(obs, dtype=torch.float32).unsqueeze(0)
+                obs_tensor = torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(self.device)
                 action, logp, value = self.actor_critic.step(obs_tensor)
                 clipped_action = torch.clamp(action, -self.act_limit, self.act_limit)
                 next_obs, reward, terminated, truncated, _ = self.env.step(clipped_action.numpy().squeeze())
@@ -154,7 +157,7 @@ class PPOAgent:
             self.reward_avg.append(np.mean(rew_buf))
 
     def select_action(self, state: np.ndarray, evaluate: bool = False):
-        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(self.device)
         action, logp, value = self.actor_critic.step(state_tensor)
         if not evaluate:
             clipped_action = torch.clamp(action, -self.act_limit, self.act_limit)
