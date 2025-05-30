@@ -77,9 +77,11 @@ class PPOAgent:
         self.lam = lam
         self.steps_per_epoch = steps_per_epoch
         self.batch_size = batch_size
-        self.act_limit = torch.tensor(act_limit)
+        self.act_limit = torch.tensor(act_limit).to(self.device)
         self.reward_avg = []
-
+    @staticmethod
+    def to_tensor(x):
+        return torch.tensor(np.array(x), dtype=torch.float32, device=self.device)
 
     def compute_advantages(self, rewards, values, dones):
         adv = np.zeros_like(rewards)
@@ -91,11 +93,11 @@ class PPOAgent:
         return adv
 
     def update(self, obs_buf, act_buf, adv_buf, ret_buf, logp_old_buf):
-        obs_buf = torch.tensor(np.array(obs_buf), dtype=torch.float32).to(self.device)
-        act_buf = torch.tensor(np.array(act_buf), dtype=torch.float32).to(self.device)
-        adv_buf = torch.tensor(np.array(adv_buf), dtype=torch.float32).to(self.device)
-        ret_buf = torch.tensor(np.array(ret_buf), dtype=torch.float32).to(self.device)
-        logp_old_buf = torch.tensor(np.array(logp_old_buf), dtype=torch.float32).to(self.device)
+        obs_buf = self.to_tensor(obs_buf)
+        act_buf = self.to_tensor(act_buf)
+        adv_buf = self.to_tensor(adv_buf)
+        ret_buf = self.to_tensor(ret_buf)
+        logp_old_buf = self.to_tensor(logp_old_buf)
 
         for _ in range(self.train_iters):
             idx = np.random.permutation(len(obs_buf))
@@ -157,12 +159,7 @@ class PPOAgent:
             self.reward_avg.append(np.mean(rew_buf))
 
     def select_action(self, state: np.ndarray, evaluate: bool = False):
-        if not torch.is_tensor(state):
-            state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(self.device)
-        else:
-            state_tensor = state.unsqueeze(0) if state.ndim == 1 else state
-
-        state_tensor = state_tensor.to(self.device)
+        state_tensor = torch.tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
         action, logp, value = self.actor_critic.step(state_tensor)
 
         if not evaluate:
