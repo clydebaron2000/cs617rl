@@ -25,6 +25,6 @@ PPO_CONFIG = OptimizationConfig(
         #
         # # Normalization and clipping
         # 'target_kl': ParameterRange(0.00, 0.03),
-        # 'n_steps': ParameterRange(40, 100, step=10),
+        'n_steps': ParameterRange(8, 32, step=1),
     }
 )
