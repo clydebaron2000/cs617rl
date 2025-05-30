@@ -157,7 +157,7 @@ class PPOAgent:
 
     def select_action(self, state: np.ndarray, evaluate: bool = False):
         if not torch.is_tensor(state):
-            state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+            state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(self.device)
         else:
             state_tensor = state.unsqueeze(0) if state.ndim == 1 else state
 
