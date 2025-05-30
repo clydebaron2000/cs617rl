@@ -79,8 +79,7 @@ class PPOAgent:
         self.batch_size = batch_size
         self.act_limit = torch.tensor(act_limit).to(self.device)
         self.reward_avg = []
-    @staticmethod
-    def to_tensor(x):
+    def to_tensor(self,x):
         return torch.tensor(np.array(x), dtype=torch.float32, device=self.device)
 
     def compute_advantages(self, rewards, values, dones):
