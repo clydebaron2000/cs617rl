@@ -30,7 +30,7 @@ class MLPActorCritic(nn.Module):
     def step(self, obs):
         with torch.no_grad():
             # Move the input observation to the same device as the model
-            obs = obs.to(self.device)
+            obs = obs.to(next(self.parameters()).device)
             mean = self.policy_net(obs)
             std = torch.exp(self.log_std)
             dist = Normal(mean, std)
